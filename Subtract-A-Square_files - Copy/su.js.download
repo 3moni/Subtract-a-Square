@@ -1,0 +1,774 @@
+/*!
+ *  \brief     Analytics and UI Customisations for Canvas
+ *  \author    Luke O'Sullivan
+ *  \author    Andy Pover
+ *  \date      22 April 2024
+ *  \copyright Swansea University
+ *  \note      In Google Analytics you'll need to set up custom dimensions as follows
+ *             (1) Canvas User ID --- Scope = User
+ *             (2) Archived --- Scope = User
+ *             (3) Canvas User Role --- Scope = User
+ *             (4) Canvas Course ID --- Scope = Hit
+ *             (5) Canvas Course Name --- Scope = Hit
+ *             (6) Canvas Sub-Account ID --- Scope = Hit
+ *             (7) Canvas Term ID --- = Scope = Hit
+ *             (8) Canvas Course Role --- Scope = Hit
+ */
+(function (i, s, o, g, r, a, m) {
+    i['GoogleTagManagagerObject'] = r;
+    i[r] = i[r] || function () {
+        i.dataLayer = i.dataLayer || [];
+        i.dataLayer.push(arguments);
+    }, i[r].l = 1 * new Date();
+    a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0];
+    a.async = 1;
+    a.src = g;
+    m.parentNode.insertBefore(a, m)
+  })(window, document, 'script', 'https://www.googletagmanager.com/gtm.js?id=GTM-W49MB3F', 'gtag');
+
+(function(d, l, u, id){
+    var ln, fln = d.getElementsByTagName(l)[0];
+    if (d.getElementById(id)){ return; }
+    ln = d.createElement(l); ln.id = id;
+    ln.href = u;
+    ln.rel = 'stylesheet';
+    fln.parentNode.insertBefore(ln, fln);
+}(document, 'link', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css', 'fa-link'));
+
+var su = {};
+
+su.translations = {
+    'en-gb': {
+        'english': "English",
+        'welsh': "Welsh",
+        'browse-courses': "Browse Courses",
+        'login-details': "Login",
+        'password': "Password",
+        'stay-signed-in': "Stay signed in",
+        'login': "Login",
+        'help': "Canvas Help",
+        'privacy-policy': "Privacy policy",
+        'acceptable-use-policy': "Acceptable Use Policy",
+        'accessibility-statement': 'Accessibility Statement',
+        'nav-help': "Canvas Help",
+        'facebook': "Facebook",
+        'twitter': "Twitter",
+        'back-to-login': "Back to Login",
+        'forgot-password': "Forgot Password?",
+        'forgot-password-text': "Enter your Login and we will send you a link to change your password.",
+        'request-password': "Request Password",
+        'help-chat-staff': "Chat with Canvas Support (Staff)",
+        'help-chat-students': "Chat with Canvas Support (Students)",
+        'help-chat-desc': "Live chat with Canvas Support!",
+        'help-phone': "Canvas Support Hotline: 08081 892406",
+        'help-phone-desc': "Call the Hotline for support or use the link to access Canvas guides",
+        'help-ask-community': "Ask the Canvas Community",
+        'help-swansea-uni': "Swansea IT Support",
+        'help-swansea-uni-desc': "Help for Library, IT and SEA (employability) enquiries",
+        'help-copyright': "Copyright Information",
+        'help-copyright-desc': "For resources and training information about copyright and intellectual property",
+        'help-contingency': "COVID-19 Canvas Resources",
+        'help-contingency-desc': "Tips for teaching and learning online",
+        'accessibility-stmt': "Accessibility Statement",
+        'module-archive': "Module Archive",
+        'reading-list': "Reading List",
+        'smart-search': "Smart Search"
+    },
+    'cy-gb': {
+        'english': "Saesneg",
+        'welsh': "Cymraeg",
+        'browse-courses': "Chwilio Cyrsiau",
+        'login-details': "Manylion Mewngofnodi",
+        'password': "Cyfrinair",
+        'stay-signed-in': "Aros wedi mewngofnodi",
+        'login': "Mewngofnodi",
+        'help': "Cymorth",
+        'privacy-policy': "Polisi Preifatrwydd",
+        'accessibility-statement': 'Datganiad am Hygyrchedd',
+        'acceptable-use-policy': "Polisi Defnydd Derbyniol",
+        'nav-help': "Cymorth Canvas",
+        'facebook': "Facebook",
+        'twitter': "Twitter",
+        'back-to-login': "Yn &ocirc;l i fewngofnodi",
+        'forgot-password': "Wedi anghofio cyfrinair?",
+        'forgot-password-text': "Cofnodwch eich manylion mewngofnodi a chewch ddolen i newid eich cyfrinair.",
+        'request-password': "Cais am Gyfrinair",
+        'help-chat-staff': "Sgwrs gyda Cymorth Canvas (Staff)",
+        'help-chat-students': "Sgwrs gyda Cymorth Canvas (Myfyrwyr)",
+        'help-chat-desc': "Sgwrs fyw gyda Cymorth Canvas!",
+        'help-phone': "Llinell Gymorth Canvas: 08081 892406",
+        'help-phone-desc': "Ffoniwch y Llinell Gymorth i dderbyn cymorth neu defnyddiwch y ddolen i gyrchu canllawiau Canvas",
+        'help-ask-community': "Gofynnwch i Gymuned Canvas",
+        'help-swansea-uni': "Cymorth TG Abertawe",
+        'help-swansea-uni-desc': "Cymorth ar gyfer ymholiadau Llyfrgell, TG ac Academi Cyflogadwyedd Abertawe (cyflogadwyedd)",
+        'help-copyright': "Gwybodaeth am Hawlfraint",
+        'help-copyright-desc': "Ar gyfer adnoddau a gwybodaeth am hyfforddiant hawlfraint ac eiddo deallusol",
+        'help-contingency': "Adnoddau COVID-19 Canvas",
+        'help-contingency-desc': "Cyngor ar gyfer dysgu ac addysgu ar-lein",
+        'accessibility-stmt': "Datganiad Hygyrchedd",
+        'module-archive': "Archif Modiwlau",
+        'reading-list': "Rhestr Ddarllen",
+        'smart-search': "Chwilio Clyfar"
+    }
+};
+
+su.waitForElm = function(selector) {
+    return new Promise(resolve => {
+        if (document.querySelector(selector)) {
+            return resolve(document.querySelector(selector));
+        }
+
+        const observer = new MutationObserver(mutations => {
+            if (document.querySelector(selector)) {
+                resolve(document.querySelector(selector));
+                observer.disconnect();
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
+}
+
+su.removeStorage = function(key) {
+    try {
+        localStorage.removeItem(key);
+        localStorage.removeItem(key + '_expiresIn');
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
+su.getStorage = function(key) {
+    var now = Date.now();
+    var expiresIn = localStorage.getItem(key + '_expiresIn');
+    if (expiresIn === undefined || expiresIn === null) {
+        expiresIn = 0;
+    }
+
+    if (expiresIn < now) {
+        su.removeStorage(key);
+        return null;
+    } else {
+        try {
+            var value = localStorage.getItem(key);
+            return value;
+        } catch (e) {
+            return null;
+        }
+    }
+}
+
+su.setStorage = function(key, value, expires) {
+    if (expires === undefined || expires === null) {
+        expires = (24 * 60 * 60);
+    } else {
+        expires = Math.abs(expires);
+    }
+
+    var now = Date.now();
+    var schedule = now + expires * 1000;
+    try {
+        localStorage.setItem(key, value);
+        localStorage.setItem(key + '_expiresIn', schedule);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
+su.coursesRequest = async function(courseId) {
+    var stringData, course;
+    let response = await fetch('/api/v1/users/self/courses?per_page=100');
+    let data = await response.text();
+    data = JSON.parse(data);
+    stringData = JSON.stringify(data);
+    su.setStorage('ga_enrollments', stringData, null);
+    course = su.parseCourses(courseId, stringData);
+    return course;
+}
+
+su.parseCourses = function(courseId, courseData) {
+    if (courseData != undefined) {
+        let data = JSON.parse(courseData);
+        for (var i = 0; i < data.length; i++) {
+            if (data[i]['id'] == courseId) {
+                return data[i];
+            }
+        }
+    }
+    return null;
+}
+
+su.gtmCourseDimensions = function(course) {
+    
+    gtag('event', 'course_access', {
+        'course_id': course['id'],
+        'course_name': course['name'],
+        'account_id': course['account_id'],
+        'enrollment_term_id': course['enrollment_term_id'],
+        'enrollment_type': course['enrollments'][0]['type'],
+    });
+
+    return
+}
+
+su.googleTagManagerCode = function(trackingId) {
+
+    var userId, userRoles, attempts, courseId;
+
+    gtag('js', new Date());
+    gtag('config',  trackingId, {cookie_flags: 'SameSite=None;Secure'});
+
+    userId = ENV["current_user_id"];
+    userRoles = ENV['current_user_roles'];
+
+    gtag('event', 'user_access', {
+        'user_id': userId,
+        'user_roles': userRoles
+    });
+
+    courseId = window.location.pathname.match(/\/courses\/(\d+)/);
+
+    if (courseId) {
+        courseId = courseId[1];
+        attempts = 0;
+        try {
+            let courses = su.getStorage('ga_enrollments');
+            if (courses != null) {
+                var course = su.parseCourses(courseId, courses);
+                if (course === null) {
+                    su.coursesRequest(courseId).then(course => {
+                        if (course === null) {
+                        gtag('event', 'course_access', {
+                            'course_id': courseId
+                        });
+                        } else {
+                            su.gtmCourseDimensions(course)
+                        }
+                    });
+                } else {
+                    su.gtmCourseDimensions(course)
+                }
+            } else {
+                su.coursesRequest(courseId).then(course => {
+                    if (course === null) {
+                    gtag('event', 'course_access', {
+                        'course_id': courseId
+                    });
+                    } else {
+                        su.gtmCourseDimensions(course)
+                    }
+                });
+            }
+        } catch (err) {
+            attempts += 1;
+            if (attempts > 5) {
+            gtag('event', 'course_access', {
+                'course_id': courseId
+            });
+            return;
+            };
+        };
+    }
+}
+
+su.getCurrentUser = async function() {
+    let response = await fetch('/api/v1/users/self');
+    let data = await response.text();
+    user = JSON.parse(data);
+    return user;
+}
+
+su.getCurrentUserPermissions = async function() {
+    let response = await fetch('/api/v1/accounts/self/permissions');
+    let data = await response.text();
+    data = JSON.parse(data);
+    return data;
+}
+
+su.checkAdminLinkPermissions = function() {
+    var attendanceLink = document.querySelector('nav .context_external_tool_2'),
+        dataPortalLink = document.querySelector('nav .context_external_tool_25'),
+        settingsLink = document.querySelector('nav .settings');
+
+    if (attendanceLink !== null) {
+        attendanceLink.parentElement.style.display = 'none';
+    }
+    if (dataPortalLink !== null) {
+        dataPortalLink.parentElement.style.display = 'none';
+    }
+    if (settingsLink !== null) {
+        settingsLink.parentElement.style.display = 'none';
+    }
+
+    su.getCurrentUserPermissions().then(function(permissions) {
+        if (permissions.hasOwnProperty('manage_lti_add') && permissions.manage_lti_add) {
+            if (attendanceLink !== null) {
+                attendanceLink.parentElement.style.display = 'list-item';
+            }
+            if (dataPortalLink !== null) {
+                dataPortalLink.parentElement.style.display = 'list-item';
+            }
+            if (settingsLink !== null) {
+                settingsLink.parentElement.style.display = 'list-item';
+            }
+        }
+    });
+}
+
+su.isAdminPage = function() {
+    return window.location.pathname.split('/')[1] == "accounts";
+}
+
+su.isCourseHomePage = function () {
+    let pathEl = window.location.pathname.split('/');
+    return pathEl.length == 3 && pathEl[1] == "courses";
+}
+
+su.isWikiPage = function() {
+    return window.location.pathname.split('/')[3] == "pages";
+}
+
+su.isLoginPage = function() {
+    return document.querySelector('.ic-Login') !== null;
+}
+
+su.isWelshLanguage = function() {
+    return document.querySelector('html[lang="cy"],html[lang="cy-gb"]') !== null;
+}
+
+su.createLanguageChanger = function() {
+    var headerlinks = document.querySelector('.ic-Login-header__links'),
+        languageChanger = document.createElement('a'),
+        languageChangerText = su.getLanguageChangerText();
+
+    languageChanger.setAttribute('href', "#");
+    languageChanger.setAttribute('class', "ic-Login__link");
+    languageChanger.setAttribute('id', "language-selector");
+    languageChanger.innerHTML = languageChangerText;
+
+    languageChanger.addEventListener('click', function(event) {
+
+        event.preventDefault();
+        su.changeLanguage();
+        su.translate();
+        su.updateLanguageChanger();
+    }, false);
+
+    headerlinks.appendChild(languageChanger);
+}
+
+su.getLanguageChangerText = function() {
+    var lang = su.getLanguage();
+    return lang === "en-gb" ? su.translations["cy-gb"].welsh : su.translations["en-gb"].english;
+}
+
+su.changeLanguage = function() {
+    var lang = su.getLanguage(),
+        newLang = lang === "en-gb" ? "cy-gb" : "en-gb";
+    su.setLanguage(newLang);
+}
+
+su.updateLanguageChanger = function() {
+    var languageChangerText = su.getLanguageChangerText();
+
+    languageChanger = document.querySelector('#language-selector');
+    languageChanger.innerHTML = languageChangerText;
+}
+
+su.getLanguage = function() {
+    var html = document.querySelector('html');
+    var attr = html.getAttribute('lang');
+    if (null == attr) {
+        attr = "en-gb";
+    }
+    if ("cy" == attr) {
+        attr = "cy-gb";
+    }
+    return attr.toLowerCase();
+}
+
+su.setLanguage = function(lang) {
+    var html = document.querySelector('html');
+
+    html.setAttribute('lang', lang);
+}
+
+su.translate = function() {
+    su.translateBrowseCourses();
+    su.translateLoginControls();
+    su.translateStaySignedIn();
+    su.translateForgotPassword();
+    su.translateFooterLinks();
+}
+
+su.translateBrowseCourses = function() {
+    var lang = su.getLanguage(),
+        links = document.querySelectorAll('.ic-Login-header__links a');
+
+    if (links !== null) {
+        links[0].innerHTML = su.translations[lang]['browse-courses'];
+    }
+}
+
+su.translateLoginControls = function() {
+    var lang = su.getLanguage(),
+        loginFormControls = document.querySelectorAll('#login_form .ic-Form-control--login label'),
+        loginButton = document.querySelector('.Button--login');
+
+    if (loginFormControls !== null) {
+        loginFormControls[0].innerHTML = su.translations[lang]['login-details'];
+        loginFormControls[1].innerHTML = su.translations[lang].password;
+    }
+
+    if (loginButton !== null) {
+        loginButton.innerHTML = su.translations[lang]['login'];
+    }
+}
+
+su.translateStaySignedIn = function() {
+    var lang = su.getLanguage(),
+        timeOutLabel = document.querySelector('#login_form .ic-Login__actions-timeout label');
+
+    if (timeOutLabel !== null) {
+        timeOutLabel.innerHTML = su.translations[lang]['stay-signed-in'];
+    }
+}
+
+su.translateForgotPassword = function() {
+    var lang = su.getLanguage(),
+        backToLogin = document.querySelector('#forgot_password_form .ic-Login__actions a'),
+        requestPasswordButton = document.querySelector('#forgot_password_form .ic-Login__actions button'),
+        forgotPasswordLink = document.querySelector('.ic-Login__actions .forgot_password_link'),
+        forgotPasswordInstructions = document.querySelector('#forgot_password_instructions'),
+        forgotPasswordFormControls = document.querySelectorAll('#forgot_password_form .ic-Form-control--login label');
+
+    if (null !== forgotPasswordLink) {
+        forgotPasswordLink.innerHTML = su.translations[lang]['forgot-password'];
+    }
+
+    if (null !== forgotPasswordInstructions) {
+        forgotPasswordInstructions.innerHTML = su.translations[lang]['forgot-password-text'];
+    }
+
+    if (null !== forgotPasswordFormControls) {
+        forgotPasswordFormControls[0].innerHTML = su.translations[lang]['login-details'];
+    }
+
+    if (null !== backToLogin) {
+        backToLogin.innerHTML = su.translations[lang]['back-to-login'];
+    }
+
+    if (null !== requestPasswordButton) {
+        requestPasswordButton.innerHTML = su.translations[lang]['request-password'];
+    }
+}
+
+su.translateFooterLinks = function() {
+
+    var footerLinks = document.querySelector('#footer-links');
+    console.log(footerLinks.innerHTML);
+
+    var lang = su.getLanguage(),
+        accessibility = document.querySelector('#footer-links a[href$="canvas-swan-ac-uk/"] span'),
+        help = document.querySelector('#footer-links a[href="http://help.instructure.com/"]'),
+        privacy = document.querySelector('#footer-links a[href$="data-protection/"] span'),
+        tos = document.querySelector('#footer-links #terms_of_service_modal a');
+
+    if (null !== help) {
+        help.innerHTML = su.translations[lang].help;
+    }
+
+    if (null !== privacy) {
+        privacy.innerHTML = su.translations[lang]['privacy-policy'];
+    }
+
+    if (null !== accessibility) {
+        accessibility.innerHTML = su.translations[lang]['accessibility-statement'];
+    }
+
+    if (null !== tos) {
+        tos.innerHTML = su.translations[lang]['acceptable-use-policy'];
+    }
+}
+
+su.replaceFooterLinks = function() {
+    var privacy = document.querySelector('#footer-links a[href$="privacy_policy"]');
+
+    if (null !== privacy) {
+        privacy.href = 'https://www.swansea.ac.uk/about-us/compliance/data-protection/';
+    }
+}
+
+su.customFooterLinks = function() {
+    var lang = su.getLanguage();
+    var container = document.getElementById('footer-links');
+    if (null != container) {
+        var link = document.createElement('a');
+        var linkText = document.createTextNode(su.translations[lang]['accessibility-stmt']);
+        link.appendChild(linkText);
+        link.href = 'https://www.swansea.ac.uk/the-university/accessibility/canvas-swan-ac-uk/';
+        link.target = '_blank';
+        container.prepend(link);
+    }
+}
+
+su.removeSocialLinks = function() {
+    var facebook = document.querySelector('#footer-links a[href*="facebook"]'),
+        twitter = document.querySelector('#footer-links a[href*="twitter"]');
+
+    if (null !== facebook) {
+        facebook.parentNode.removeChild(facebook);
+    }
+
+    if (null !== twitter) {
+        twitter.parentNode.removeChild(twitter);
+    }
+}
+
+su.removeFooterEpilogue = function() {
+    var footerEpilogue = document.querySelector('#footer-epilogue');
+
+    if (null !== footerEpilogue) {
+        footerEpilogue.parentNode.removeChild(footerEpilogue);
+    }
+}
+
+su.translateNavigation = function() {
+    var lang = su.getLanguage();
+    var moduleArchiveLinkText = document.querySelector('#context_external_tool_208_menu_item div');
+    if (null !== moduleArchiveLinkText) {
+        moduleArchiveLinkText.textContent = su.translations[lang]['module-archive'];
+    }
+    var readingListLinkText = document.querySelector('.ic-app-course-menu a.context_external_tool_46');
+    if (null !== readingListLinkText) {
+        readingListLinkText.textContent = su.translations[lang]['reading-list'];
+    }
+
+    var smartSearchLinkText = document.querySelector('.ic-app-course-menu a.search');
+    if (null !== smartSearchLinkText) {
+        smartSearchLinkText.textContent = su.translations[lang]['smart-search'];
+    }
+}
+
+su.translateHelpMenu = function() {
+    var staffChatLink = document.querySelector('#help_tray a[href*="chattype=admin"]'),
+        studentChatLink = document.querySelector('#help_tray a[href*="chattype=student"]'),
+        phoneSupportLink = document.querySelectorAll('#help_tray a[href$="guides/"]')[1],
+        communityLink = document.querySelector('#help_tray a[href$="/answers"]'),
+        swanseaLink = document.querySelector('#help_tray a[href$="services/help/"]'),
+        copyrightLink = document.querySelector('#help_tray a[href*="copyright"]'),
+        contingencyLink = document.querySelector('#help_tray a[href$="/contingency"]');
+    var staffChatDesc, studentChatDesc, phoneSupportDesc, swanseaDesc, copyrightDesc,
+        contingencyDesc;
+    var lang = su.getLanguage();
+
+    if (null !== staffChatLink) {
+        staffChatDesc = staffChatLink.parentNode.lastChild;
+        staffChatLink.firstChild.textContent = su.translations[lang]['help-chat-staff'];
+        staffChatDesc.textContent = su.translations[lang]['help-chat-desc'];
+    }
+
+    if (null !== studentChatLink) {
+        studentChatDesc = studentChatLink.parentNode.lastChild;
+        studentChatLink.firstChild.textContent = su.translations[lang]['help-chat-students'];
+        studentChatDesc.textContent = su.translations[lang]['help-chat-desc'];
+    }
+
+    if (null !== phoneSupportLink) {
+        phoneSupportDesc = phoneSupportLink.parentNode.lastChild;
+        phoneSupportLink.firstChild.textContent = su.translations[lang]['help-phone'];
+        phoneSupportDesc.textContent = su.translations[lang]['help-phone-desc'];
+    }
+
+    if (null !== communityLink) {
+        communityLink.firstChild.textContent = su.translations[lang]['help-ask-community'];
+    }
+
+    if (null !== swanseaLink) {
+        swanseaDesc = swanseaLink.parentNode.lastChild;
+        swanseaLink.firstChild.textContent = su.translations[lang]['help-swansea-uni'];
+        swanseaDesc.textContent = su.translations[lang]['help-swansea-uni-desc'];
+    }
+
+    if (null !== copyrightLink) {
+        copyrightDesc = copyrightLink.parentNode.lastChild;
+        copyrightLink.firstChild.textContent = su.translations[lang]['help-copyright'];
+        copyrightDesc.textContent = su.translations[lang]['help-copyright-desc'];
+    }
+
+    if (null !== contingencyLink) {
+        contingencyDesc = contingencyLink.parentNode.lastChild;
+        contingencyLink.firstChild.textContent = su.translations[lang]['help-contingency'];
+        contingencyDesc.textContent = su.translations[lang]['help-contingency-desc'];
+    }
+}
+
+su.translateHelpMenuDelayed = function() {
+    setTimeout(function() {
+        su.translateHelpMenu();
+    }, 200);
+}
+
+su.translateTabs = function() {
+    var lang = "cy-gb";
+    var engLink = document.querySelector('#su-bp-tab-en'),
+        cymLink =  document.querySelector('#su-bp-tab-cy');
+    if (engLink != null && cymLink != null) {
+        engLink.textContent = su.translations[lang]['english'];
+        cymLink.textContent = su.translations[lang]['welsh'];
+    }
+}
+
+su.uncheckPeerReview = function() {
+    if (window.location.href.indexOf("assignments/new") > -1) {
+        su.waitForElm('#assignment_peer_reviews').then((checkbox) => {
+            checkbox.checked = false;
+            var fieldset = document.getElementById('peer_reviews_details');
+            fieldset.style.display = "none";
+        });
+    }
+}
+
+su.tabs = function (selected) {
+    // See https://codepen.io/heydon/pen/veeaEa
+    // Get relevant elements and collections
+    const tabbed = document.querySelector('.su .tabbed');
+    if (null != tabbed) {
+        const tablist = tabbed.querySelector('ul');
+        const tabs = tablist.querySelectorAll('a');
+        const panels = tabbed.querySelectorAll('[id^="su-bp-panel"]');
+        
+        // The tab switching function
+        const switchTab = (oldTab, newTab) => {
+            newTab.focus();
+            // Make the active tab focusable by the user (Tab key)
+            newTab.removeAttribute('tabindex');
+            // Set the selected state
+            newTab.setAttribute('aria-selected', 'true');
+            oldTab.removeAttribute('aria-selected');
+            oldTab.setAttribute('tabindex', '-1');
+            // Get the indices of the new and old tabs to find the correct
+            // tab panels to show and hide
+            let index = Array.prototype.indexOf.call(tabs, newTab);
+            let oldIndex = Array.prototype.indexOf.call(tabs, oldTab);
+            panels[oldIndex].hidden = true;
+            panels[index].hidden = false;
+        }
+        
+        // Add the tablist role to the first <ul> in the .tabbed container
+        tablist.setAttribute('role', 'tablist');
+        
+        // Add semantics are remove user focusability for each tab
+        Array.prototype.forEach.call(tabs, (tab, i) => {
+            tab.setAttribute('role', 'tab');
+            if (null == tab.getAttribute('id')) {
+                tab.setAttribute('id', 'tab' + (i + 1));
+            }
+            tab.setAttribute('tabindex', '-1');
+            tab.parentNode.setAttribute('role', 'presentation');
+        
+            // Handle clicking of tabs for mouse users
+            tab.addEventListener('click', e => {
+                e.preventDefault();
+                let currentTab = tablist.querySelector('[aria-selected]');
+                if (e.currentTarget !== currentTab) {
+                    switchTab(currentTab, e.currentTarget);
+                }
+            });
+        
+            // Handle keydown events for keyboard users
+            tab.addEventListener('keydown', e => {
+                // Get the index of the current tab in the tabs node list
+                let index = Array.prototype.indexOf.call(tabs, e.currentTarget);
+                // Work out which key the user is pressing and
+                // Calculate the new tab's index where appropriate
+                let dir = e.which === 37 ? index - 1 : e.which === 39 ? index + 1 : e.which === 40 ? 'down' : null;
+                if (dir !== null) {
+                    e.preventDefault();
+                    // If the down key is pressed, move focus to the open panel,
+                    // otherwise switch to the adjacent tab
+                    dir === 'down' ? panels[i].focus() : tabs[dir] ? switchTab(e.currentTarget, tabs[dir]) : void 0;
+                }
+            });
+        });
+        
+        // Add tab panel semantics and hide them all
+        Array.prototype.forEach.call(panels, (panel, i) => {
+            panel.setAttribute('role', 'tabpanel');
+            panel.setAttribute('tabindex', '-1');
+            let id = panel.getAttribute('id');
+            panel.setAttribute('aria-labelledby', tabs[i].id);
+            panel.hidden = true; 
+        });
+
+        if(selected != null) {
+            let tab = document.querySelector('[id="' + selected +'"]'),
+                panel = document.querySelector(tab.getAttribute('href'));
+            tab.removeAttribute('tabindex');
+            tab.setAttribute('aria-selected', 'true');
+            panel.hidden = false;
+        } else {
+            // Initially activate the first tab and reveal the first tab panel
+            tabs[0].removeAttribute('tabindex');
+            tabs[0].setAttribute('aria-selected', 'true');
+            panels[0].hidden = false;
+        }  
+    }
+
+    tabbed.classList.add('tabbed-show');
+}
+
+su.load = function() {
+    su.googleTagManagerCode("GTM-W49MB3F");
+    if (su.isLoginPage()) {
+        su.removeSocialLinks();
+        su.removeFooterEpilogue();
+        su.replaceFooterLinks();
+        su.customFooterLinks();
+        su.createLanguageChanger();
+    }
+    if (su.isAdminPage()) {
+        su.checkAdminLinkPermissions();
+    }
+    if (su.isWelshLanguage()) {
+        var lang = "cy-gb";
+        var helpLink = document.getElementById('global_nav_help_link');
+        if (null !== helpLink) {
+            helpLink.addEventListener("click", su.translateHelpMenuDelayed, false);
+            var helpDescription = helpLink.children[1];
+            if (null !== helpDescription) {
+                helpDescription.textContent = su.translations[lang]['nav-help'];
+            }
+        }
+        setTimeout(function() {
+            su.translateNavigation();
+        }, 100);
+    }
+    su.uncheckPeerReview();
+    if (su.isWikiPage() || su.isCourseHomePage()) {
+        su.waitForElm(".su .tabbed").then((elm) => {
+            su.tabs(su.isWelshLanguage() == true ? 'su-bp-tab-cy' : null );
+            if (su.isWelshLanguage()) {
+                su.translateTabs();
+            }
+        });
+    }
+}
+
+function suLoad() {
+    su.load();
+}
+
+document.addEventListener('DOMContentLoaded', suLoad); // Once First loaded
+document.addEventListener('pageshow', suLoad); // Content shown
+document.addEventListener('hashchange', suLoad); // Hash changed on Url
+document.addEventListener('popstate', suLoad); // Back button of browser
+if (document.readyState !== 'loading') {
+    suLoad(); // Already loaded
+}
